@@ -91,7 +91,7 @@ def start_train(model,loader,optimizer,question_data,ans_data,train_loss_array,t
 
 #-----------------------------------------------main--------------------------------------------------------
 #讀檔
-load = "F:\\Desktop\\Graduation Topic\\data.csv"
+load = "data.csv"
 read = pd.read_csv(load)
 input = read[["x","y"]].values.astype('float32')
 
@@ -144,8 +144,14 @@ train_loss_array = []
 test_loss_array = []
 xy = 1
 start_train(model_y,loader_y,optimizer_y,y_question_train,y_question_test,train_loss_array,test_loss_array)
-get_ans = model_x(train_list)
-print(get_ans)
-#    for i in range(len(train_total_plot)):
-#        writer.writerow([str(train_total_plot[i][0]),str(train_total_plot[i][1])])
-    
+
+x_ans = model_x(x_question_test)
+y_ans = model_y(y_question_test)
+
+
+# 開啟輸出的 CSV 檔案
+with open('output.csv', 'w', newline='') as csvfile:# 建立 CSV 檔寫入器
+    writer = csv.writer(csvfile)
+    writer.writerow(['x', 'y'])
+    for i in range(len(x_ans)):
+        writer.writerow([x_ans[i].item(),y_ans[i].item()])

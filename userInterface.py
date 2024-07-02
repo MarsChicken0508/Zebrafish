@@ -1,16 +1,19 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import ttk
+import opencv_engine
+import subprocess
 
 def yolo_calculate(image_path, weight_path):
     # 假設這是一個 YOLO 計算的函數
     # 這裡放置你的 YOLO 計算邏輯
     result_image_path = image_path  # 這是個假設，實際上應該返回處理過的圖片路徑
     return result_image_path
-
+''''''
 def lstm_calculate(image_path):
     # 假設這是一個 LSTM 計算的函數
     # 這裡放置你的 LSTM 計算邏輯
+    #result = subprocess.run(['python', 'lstmdo2.py'], stdout=subprocess.PIPE)
     return "LSTM Calculation Result"
 
 def select_file():
@@ -35,10 +38,12 @@ def perform_yolo():
 
 def perform_lstm():
     file_path = file_path_var.get()
+    '''
     if not file_path:
         messagebox.showerror("Error", "Please select a file path.")
         return
-
+    '''
+    result = subprocess.run(['python', 'lstmdo2.py'], stdout=subprocess.PIPE)
     result = lstm_calculate(file_path)
     result_var.set(result)
 
