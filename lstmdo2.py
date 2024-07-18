@@ -11,41 +11,42 @@ import matplotlib.pyplot as plt     #資料庫用的
 import plotly.express as px    #繪圖用的
 import csv
 
-def create_dataset(dataset,size,xy):#分割測試集訓練集的副程式
+def create_dataset(dataset,size):#分割測試集訓練集的副程式
     question,ans = [],[]
     for i in range(len(dataset) - size):
-        q_array = dataset[i:i + size][xy]
-        a_array = dataset[i + 1:i + size + 1][xy]
+        q_array = dataset[i:i + size]
+        a_array = dataset[i + 1:i + size + 1]
         ans.append(a_array)
         question.append(q_array)
-    return torch.tensor(question),torch.tensor(ans)
+    return torch.tensor(question, dtype=torch.float32), torch.tensor(ans, dtype=torch.float32)
+    #return torch.tensor(question),torch.tensor(ans)
 
 #LSTM模型
 class lstm_model(nn.Module):
     def __init__(self):
         super().__init__()
         self.lstm = nn.LSTM(input_size= 2,hidden_size=64,num_layers=2,batch_first=True)#hidden_size = 64
-        self.linear = nn.Linear(64,1)#(64,1)
+        self.linear = nn.Linear(64,2)#(64,1)
         self.dropout = nn.Dropout(0.1)#0.1
     def forward(self,x):
-        #print(x)
         x, _ = self.lstm(x)
-        #print(x)
         x = self.dropout(x)
-        #print(x)
+        x = x[:, -1, :]
         x = self.linear(x)
-        #print(x)
+        
         return x
-
-
+   
 def start_train(model,loader,optimizer,question_data,ans_data,train_loss_array,test_loss_array):
     for epoch in range(n_epochs):
-        #print(epoch)
         model.train()
         for question_batch, ans_batch in loader:
+            question_batch = torch.randn(1, lookback, 2)
             ans_pred = model(question_batch)
+            
+            #let_me_look = ans_pred.view(0)
+            #print(question_batch)
+            #print("epoch=",epoch)
             #print(ans_pred)
-            #print(ans_batch)
             loss = loss_fn(ans_pred,ans_batch)
             '''
             ans_pred = 預測值
@@ -60,11 +61,10 @@ def start_train(model,loader,optimizer,question_data,ans_data,train_loss_array,t
         model.eval()
         with torch.no_grad():
             ans_pred = model(question_data)
-            train_loss = loss_fn(ans_pred,question_data).item()
+            train_loss = loss_fn(ans_pred,question_data[:, -1, :]).item()
 
             ans_pred = model(ans_data)
-
-            test_loss = loss_fn(ans_pred,ans_data).item()
+            test_loss = loss_fn(ans_pred,ans_data[:, -1, :]).item()
             #print(epoch)
             train_loss_array.append(train_loss)
             test_loss_array.append(test_loss)
@@ -74,21 +74,13 @@ def start_train(model,loader,optimizer,question_data,ans_data,train_loss_array,t
     with torch.no_grad():
         model.eval()
 
-        train_plot = np.ones_like(input[ :, xy]) * np.nan
+        train_plot = np.ones_like(question_data) * np.nan
         ans_pred = model(question_data)
-        train_plot[lookback:train_size] = model(question_data).view(-1)
-        test_plot = np.ones_like(input[ :, xy]) * np.nan
-        test_plot[train_size + lookback : len(input)] = model(ans_data).view(-1)
-    '''
-    plt.plot(input[xy])
-    plt.plot(train_plot)
-    plt.plot(test_plot)
-    plt.show()
-    print(train_plot)
-    print(test_plot)
-    '''
-    #blue = ans,orange = train_pred,green = test_pred
-
+        train_plot[lookback:train_size] = model(question_data)
+        test_plot = np.ones_like(input) * np.nan
+        test_plot[train_size + lookback : len(input)] = model(ans_data).numpy()
+'''     train_loss_array.append(train_loss)
+        test_loss_array.append(test_loss)'''
 #-----------------------------------------------main--------------------------------------------------------
 #讀檔
 load = "data.csv"
@@ -100,58 +92,38 @@ train_size = int(len(input) * 0.67)
 test_size = len(input) - train_size
 train_list,test_list = input[:train_size],input[train_size:]
 
-lookback = 15#一次抓取測試資料大小
+lookback = 10#一次抓取測試資料大小
 
 #切割好訓練集and測試集的數據以及各數據計算出的答案
-x_question_train,x_ans_train = create_dataset(train_list,lookback,0)
-y_question_train,y_ans_train = create_dataset(train_list,lookback,1)
-x_question_test,x_ans_test = create_dataset(test_list,lookback,0)
-y_question_test,y_ans_test = create_dataset(test_list,lookback,1)
+question_train,ans_train = create_dataset(train_list,lookback)
+question_test,ans_test = create_dataset(test_list,lookback)
 
-'''
-print(x_question_train)
-print(x_ans_train)
-print(y_question_train)
-print(y_ans_train)
-print(x_question_test)
-print(x_ans_test)
-print(y_question_test)
-print(y_ans_test)
+model = lstm_model()
+optimizer = optim.RMSprop(model.parameters())
 
-print(x_question_train.size,x_ans_train.size)
-print(y_question_train.size,y_ans_train.size)
-print(x_question_test.size,x_ans_test.size)
-print(y_question_test.size,y_ans_test.size)
-'''
-
-model_x = lstm_model()
-model_y = lstm_model()
-optimizer_x = optim.RMSprop(model_x.parameters())
-optimizer_y = optim.RMSprop(model_y.parameters())
 loss_fn = nn.HuberLoss()
-n_epochs = 1000
+n_epochs = 101
 
-
-loader_x = data.DataLoader(data.TensorDataset(x_question_train,x_ans_train),shuffle=False,batch_size=lookback)
-loader_y = data.DataLoader(data.TensorDataset(y_question_train,y_ans_train),shuffle=False,batch_size=lookback)
+loader = data.DataLoader(data.TensorDataset(question_train,ans_train),shuffle=False,batch_size=lookback)
 train_loss_array = []
 test_loss_array = []
-xy = 0
-start_train(model_x,loader_x,optimizer_x,x_question_train,x_question_test,train_loss_array,test_loss_array)
 
-#start_train(model_x,loader_x,optimizer_x,x_question_train,x_ans_train,train_loss_array,test_loss_array)
+start_train(model,loader,optimizer,question_train,question_test,train_loss_array,test_loss_array)
+
 train_loss_array = []
 test_loss_array = []
-xy = 1
-start_train(model_y,loader_y,optimizer_y,y_question_train,y_question_test,train_loss_array,test_loss_array)
 
-x_ans = model_x(x_question_test)
-y_ans = model_y(y_question_test)
-
+ans = model(question_test)
+opt_loader = data.DataLoader(data.TensorDataset(question_test,ans_test),shuffle=False,batch_size=lookback)
 
 # 開啟輸出的 CSV 檔案
 with open('output.csv', 'w', newline='') as csvfile:# 建立 CSV 檔寫入器
     writer = csv.writer(csvfile)
     writer.writerow(['x', 'y'])
-    for i in range(len(x_ans)):
-        writer.writerow([x_ans[i].item(),y_ans[i].item()])
+    for opt_array,ans_array in (opt_loader):
+        #print(opt_array)
+        opt_array = torch.randn(1, lookback, 2)
+        with torch.no_grad():
+            get_ans = model(opt_array)
+            print(get_ans)
+        writer.writerow([get_ans])
