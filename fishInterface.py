@@ -13,12 +13,17 @@ def select_file():
     if file_path:
         file_path_var.set(file_path)
 
+def select_weight_file():
+    weight_file_path = filedialog.askopenfilename(filetypes=[("Weight Files", "*.weights")])
+    if weight_file_path:
+        weight_value_var.set(weight_file_path)
+
 def perform_yolo():
     file_path = file_path_var.get()
-    weight_value = weight_value_var.get()
+    weight_file_path = weight_value_var.get()
 
     try:
-        weight_value = float(weight_value)
+        weight_value = float(weight_file_path)  # 在這裡應該根據實際需求處理權重文件
     except ValueError:
         messagebox.showerror("錯誤", "權重數值格式錯誤。請輸入有效的數字。")
         return
@@ -112,13 +117,10 @@ ttk.Label(main_frame, text="Select Image/Video:").grid(row=0, column=0, padx=5, 
 ttk.Entry(main_frame, textvariable=file_path_var, width=50).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 ttk.Button(main_frame, text="Browse", command=select_file).grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
-# 權重值輸入
-ttk.Label(main_frame, text="Enter Weight Value:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
-weight_entry = ttk.Entry(main_frame, textvariable=weight_value_var, width=50, validate="focusout", validatecommand=(root.register(validate_weight_input), '%P'))
-weight_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-
-# 添加失去焦點時的無效輸入處理
-weight_entry.bind("<FocusOut>", lambda event: on_invalid_weight() if not validate_weight_input(weight_value_var.get()) else None)
+# 權重值選擇
+ttk.Label(main_frame, text="Select Weight Value:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+ttk.Entry(main_frame, textvariable=weight_value_var, width=50, validate="key", validatecommand=(root.register(validate_weight_input), '%P')).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+ttk.Button(main_frame, text="Browse", command=select_weight_file).grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
 # YOLO 計算按鈕
 ttk.Button(main_frame, text="YOLO 辨識結果", command=perform_yolo).grid(row=2, column=1, padx=5, pady=5, sticky="ew")
