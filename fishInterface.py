@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import ttk
 
-def yolo_calculate(image_path, weight_value):
+def yolo_calculate(image_path, weight_file_path):
     # 假設這是一個 YOLO 計算的函數
     # 這裡放置你的 YOLO 計算邏輯
     result_image_path = image_path  # 這是個假設，實際上應該返回處理過的圖片路徑
@@ -22,13 +22,7 @@ def perform_yolo():
     file_path = file_path_var.get()
     weight_file_path = weight_value_var.get()
 
-    try:
-        weight_value = float(weight_file_path)  # 在這裡應該根據實際需求處理權重文件
-    except ValueError:
-        messagebox.showerror("錯誤", "權重數值格式錯誤。請輸入有效的數字。")
-        return
-
-    result_image_path = yolo_calculate(file_path, weight_value)
+    result_image_path = yolo_calculate(file_path, weight_file_path)
     load_image(result_image_path)
     show_zebrafish_window()
 
@@ -65,21 +59,6 @@ def zebrafish_video():
 def zebrafish_behavior(behavior_type):
     # Placeholder for zebrafish behavior calculation logic
     messagebox.showinfo("斑馬魚行為", f"斑馬魚行為 ({behavior_type}) 計算完成。")
-
-def validate_weight_input(new_value):
-    if new_value == "":
-        return True
-    try:
-        float_value = float(new_value)
-        # Check if the value has at most two decimal places
-        if '.' in new_value and len(new_value.split(".")[1]) > 2:
-            return False
-        return True
-    except ValueError:
-        return False
-
-def on_invalid_weight():
-    messagebox.showerror("錯誤", "權重數值格式錯誤。請輸入最多兩位小數的有效數字。")
 
 # 建立主視窗
 root = tk.Tk()
@@ -119,7 +98,7 @@ ttk.Button(main_frame, text="Browse", command=select_file).grid(row=0, column=2,
 
 # 權重值選擇
 ttk.Label(main_frame, text="Select Weight Value:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
-ttk.Entry(main_frame, textvariable=weight_value_var, width=50, validate="key", validatecommand=(root.register(validate_weight_input), '%P')).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+ttk.Entry(main_frame, textvariable=weight_value_var, width=50).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 ttk.Button(main_frame, text="Browse", command=select_weight_file).grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
 # YOLO 計算按鈕
