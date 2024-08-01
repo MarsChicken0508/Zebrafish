@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO 和 LSTM 網頁界面</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YOLO 和 LSTM 網頁界面</h1>
+        <div class="file-input">
+            <label for="file">Select Image/Video:</label>
+            <input type="file" id="file" accept=".gif">
+        </div>
+        <div class="file-input">
+            <label for="weight-file">Select Weight Value:</label>
+            <input type="file" id="weight-file" accept=".weights">
+        </div>
+        <button id="yolo-button">YOLO 辨識結果</button>
+        <div id="image-container"></div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
