@@ -38,3 +38,15 @@ button:hover {
     max-width: 100%;
     margin-top: 20px;
 }
+
+#buttons-container {
+    margin-top: 20px;
+    text-align: center; /* 使按鈕區域內的按鈕居中對齊 */
+}
+
+#buttons-container button {
+    display: inline-block;
+    margin: 10px 5px; /* 調整按鈕間距 */
+    width: 45%; /* 每個按鈕寬度調整為父容器的45%，使每行最多容納兩個按鈕 */
+    box-sizing: border-box; /* 包括內邊距和邊框在內的總寬度計算 */
+}
