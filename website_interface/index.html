@@ -13,12 +13,16 @@
             <label for="file">Select Image/Video:</label>
             <input type="file" id="file" accept=".gif">
         </div>
-        <div class="file-input">
-            <label for="weight-file">Select Weight Value:</label>
-            <input type="file" id="weight-file" accept=".weights">
-        </div>
         <button id="yolo-button">YOLO 辨識結果</button>
         <div id="image-container"></div>
+        <div id="buttons-container" style="display: none;">
+            <button id="zebrafish-video">斑馬魚運動軌跡影片</button>
+            <button id="normal-behavior">正常佔比</button>
+            <button id="fear-behavior">害怕佔比</button>
+            <button id="anxiety-behavior">焦慮佔比</button>
+            <button id="depression-behavior">壓抑佔比</button>
+            <button id="download-video">下載影片</button>
+        </div>
     </div>
 
     <script src="main.js"></script>
